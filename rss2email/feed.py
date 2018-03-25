@@ -33,6 +33,7 @@
 
 import collections as _collections
 from email.mime.message import MIMEMessage as _MIMEMessage
+from email.mime.text import MIMEText as _MIMEText
 from email.mime.multipart import MIMEMultipart as _MIMEMultipart
 from email.utils import formataddr as _formataddr
 import hashlib as _hashlib
@@ -500,6 +501,12 @@ class Feed (object):
             extra_headers=extra_headers,
             config=self.config,
             section=self.section)
+        if self.digest:
+            self.digest_body += "-------------------------\n"
+            self.digest_body += subject+"\n"
+            self.digest_body += self._get_entry_link(entry) + "\n"
+            self.digest_body += "-------------------------\n"
+            self.digest_body += "Extrait: "  +content['value']+"\n"
         return (guid, id_, sender, message)
 
     def _get_entry_id(self, entry):
@@ -794,8 +801,9 @@ class Feed (object):
                     raise _error.ProcessingError(parsed=None, feed=self)
             else:
                 lines = [content['value']]
-            lines.append('')
-            lines.append('URL: {}'.format(link))
+            if not self.digest:
+                lines[0]=lines[0][:-1]
+                lines.append("URL: {}".format(link))
             for enclosure in getattr(entry, 'enclosures', []):
                 if getattr(enclosure, 'url', None):
                     lines.append('Enclosure: {}'.format(enclosure.url))
@@ -807,7 +815,7 @@ class Feed (object):
                     title = elink.get('title', url)
                     lines.append('Via: {} {}'.format(title, url))
             content['type'] = 'text/plain'
-            content['value'] = '\n'.join(lines)
+            content['value'] = ''.join(lines)
             return content
 
     def _send(self, sender, message):
@@ -843,7 +851,6 @@ class Feed (object):
             _LOG.debug('new message: {}'.format(message['Subject']))
             if self.digest:
                 seen.append((guid, id_))
-                self._append_to_digest(digest=digest, message=message)
             else:
                 if send:
                     self._send(sender=sender, message=message)
@@ -852,42 +859,37 @@ class Feed (object):
                 self.seen[guid]['id'] = id_
 
         if self.digest and seen:
-            if self.digest_post_process:
-                digest = self.digest_post_process(
-                    feed=self, parsed=parsed, seen=seen, message=digest)
-                if not digest:
-                    return
-            self._send_digest(
-                digest=digest, seen=seen, sender=sender, send=send)
+            # digest.set_payLoad(self.digest_body)
+            # if self.digest_post_process:
+            #     digest = self.digest_post_process(
+            #         feed=self, parsed=parsed, seen=seen, message=digest)
+            #     if not digest:
+            #         return
+            self._send_digest(seen=seen, send=send)
 
         self.etag = parsed.get('etag', None)
         self.modified = parsed.get('modified', None)
 
     def _new_digest(self):
-        digest = _MIMEMultipart('digest')
-        digest['To'] = self.to  # TODO: _Header(), _formataddr((recipient_name, recipient_addr))
-        digest['Subject'] = 'digest for {}'.format(self.name)
-        digest['Message-ID'] = '<{}@dev.null.invalid>'.format(_uuid.uuid4())
-        digest['User-Agent'] = _USER_AGENT
-        digest['X-RSS-Feed'] = self.url
-        return digest
+        self.digest_body = ""
 
-    def _append_to_digest(self, digest, message):
-        part = _MIMEMessage(message)
-        part.add_header('Content-Disposition', 'attachment')
-        digest.attach(part)
 
-    def _send_digest(self, digest, seen, sender, send=True):
+    def _send_digest(self, seen, send=True):
         """Send a digest message
 
         The date is extracted from the last message in the digest
         payload.  We assume that this part exists.  If you don't have
         any messages in the digest, don't call this function.
         """
-        digest['From'] = sender  # TODO: _Header(), _formataddr()...
-        last_part = digest.get_payload()[-1]
-        last_message = last_part.get_payload()[0]
-        digest['Date'] = last_message['Date']
+        sender = _formataddr(('Pau à Vélo', 'pau@fubicy.org'))  # TODO: _Header(), _formataddr()...
+        digest = _MIMEText(self.digest_body,'text')
+        digest['From'] = sender
+        digest['To'] = self.to  # TODO: _Header(), _formataddr((recipient_name, recipient_addr))
+        digest['Subject'] = 'Les infos de Pau à Vélo'
+        digest['Message-ID'] = '<{}@dev.null.invalid>'.format(_uuid.uuid4())
+        digest['User-Agent'] = _USER_AGENT
+        digest['X-RSS-Feed'] = self.url
+        # digest['Date'] = last_message['Date']
 
         _LOG.debug('new digest for {}'.format(self))
         if send:
