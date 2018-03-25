@@ -4,54 +4,8 @@
     {
       "name": "rss2email",
       "etag": null,
-      "modified": "Sun, 25 Mar 2018 21:01:27 GMT",
-      "seen": {
-        "http://localhost:1313/posts/post2/": {
-          "id": "http://localhost:1313/posts/post2/"
-        },
-        "http://localhost:1313/posts/post1/": {
-          "id": "http://localhost:1313/posts/post1/"
-        },
-        "http://localhost:1313/posts/post3/": {
-          "id": "http://localhost:1313/posts/post3/"
-        },
-        "http://localhost:1313/posts/post-with-image/": {
-          "id": "http://localhost:1313/posts/post-with-image/"
-        },
-        "http://localhost:1313/events/test-event/": {
-          "id": "http://localhost:1313/events/test-event/"
-        },
-        "http://localhost:1313/events/event-with-image/": {
-          "id": "http://localhost:1313/events/event-with-image/"
-        },
-        "http://localhost:1313/home/contact/": {
-          "id": "http://localhost:1313/home/contact/"
-        },
-        "http://localhost:1313/home/tags/": {
-          "id": "http://localhost:1313/home/tags/"
-        },
-        "http://localhost:1313/home/teaching/": {
-          "id": "http://localhost:1313/home/teaching/"
-        },
-        "http://localhost:1313/home/projects/": {
-          "id": "http://localhost:1313/home/projects/"
-        },
-        "http://localhost:1313/home/posts/": {
-          "id": "http://localhost:1313/home/posts/"
-        },
-        "http://localhost:1313/home/talks/": {
-          "id": "http://localhost:1313/home/talks/"
-        },
-        "http://localhost:1313/home/publications/": {
-          "id": "http://localhost:1313/home/publications/"
-        },
-        "http://localhost:1313/home/publications_selected/": {
-          "id": "http://localhost:1313/home/publications_selected/"
-        },
-        "http://localhost:1313/home/about/": {
-          "id": "http://localhost:1313/home/about/"
-        }
-      }
+      "modified": null,
+      "seen": {}
     }
   ]
 }
